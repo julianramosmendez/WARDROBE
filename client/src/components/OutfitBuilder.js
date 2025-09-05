@@ -13,7 +13,8 @@ function OutfitBuilder() {
     shoes: null,
     accessories: []
   });
-  const [showOutfit, setShowOutfit] = useState(false);
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
+  const [currentItemIndex, setCurrentItemIndex] = useState(0);
 
   // Function to ensure image URLs are correct
   const getImageUrl = (imageUrl) => {
@@ -64,26 +65,66 @@ function OutfitBuilder() {
     }
   };
 
+  const categories = ['Tops', 'Bottoms', 'Shoes', 'Accessories'];
+
   const getItemsByCategory = (category) => {
     return items.filter(item => item.category === category);
   };
 
-  const selectItem = (item, category) => {
-    if (category === 'Accessories') {
+  const getCurrentCategory = () => {
+    return categories[currentCategoryIndex];
+  };
+
+  const getCurrentItems = () => {
+    return getItemsByCategory(getCurrentCategory());
+  };
+
+  const getCurrentItem = () => {
+    const currentItems = getCurrentItems();
+    return currentItems[currentItemIndex] || null;
+  };
+
+  const navigateItems = (direction) => {
+    const currentItems = getCurrentItems();
+    if (currentItems.length === 0) return;
+
+    if (direction === 'next') {
+      setCurrentItemIndex(prev => (prev + 1) % currentItems.length);
+    } else {
+      setCurrentItemIndex(prev => prev === 0 ? currentItems.length - 1 : prev - 1);
+    }
+  };
+
+  const navigateCategories = (direction) => {
+    if (direction === 'next') {
+      setCurrentCategoryIndex(prev => (prev + 1) % categories.length);
+    } else {
+      setCurrentCategoryIndex(prev => prev === 0 ? categories.length - 1 : prev - 1);
+    }
+    setCurrentItemIndex(0); // Reset item index when changing categories
+  };
+
+  const selectCurrentItem = () => {
+    const currentItem = getCurrentItem();
+    const currentCategory = getCurrentCategory();
+    
+    if (!currentItem) return;
+
+    if (currentCategory === 'Accessories') {
       // For accessories, toggle selection (multiple allowed)
       setSelectedOutfit(prev => {
         const currentAccessories = prev.accessories || [];
-        const isSelected = currentAccessories.some(acc => acc._id === item._id);
+        const isSelected = currentAccessories.some(acc => acc._id === currentItem._id);
         
         if (isSelected) {
           return {
             ...prev,
-            accessories: currentAccessories.filter(acc => acc._id !== item._id)
+            accessories: currentAccessories.filter(acc => acc._id !== currentItem._id)
           };
         } else {
           return {
             ...prev,
-            accessories: [...currentAccessories, item]
+            accessories: [...currentAccessories, currentItem]
           };
         }
       });
@@ -91,16 +132,21 @@ function OutfitBuilder() {
       // For other categories, single selection
       setSelectedOutfit(prev => ({
         ...prev,
-        [category.toLowerCase()]: item
+        [currentCategory.toLowerCase()]: currentItem
       }));
     }
   };
 
-  const isItemSelected = (item, category) => {
-    if (category === 'Accessories') {
-      return selectedOutfit.accessories?.some(acc => acc._id === item._id) || false;
+  const isCurrentItemSelected = () => {
+    const currentItem = getCurrentItem();
+    const currentCategory = getCurrentCategory();
+    
+    if (!currentItem) return false;
+    
+    if (currentCategory === 'Accessories') {
+      return selectedOutfit.accessories?.some(acc => acc._id === currentItem._id) || false;
     }
-    return selectedOutfit[category.toLowerCase()]?._id === item._id;
+    return selectedOutfit[currentCategory.toLowerCase()]?._id === currentItem._id;
   };
 
   const clearOutfit = () => {
@@ -110,7 +156,6 @@ function OutfitBuilder() {
       shoes: null,
       accessories: []
     });
-    setShowOutfit(false);
   };
 
   const saveOutfit = async () => {
@@ -120,8 +165,8 @@ function OutfitBuilder() {
 
   if (loading) {
     return (
-      <div className="outfit-builder">
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
+      <div className="outfit-builder-simple">
+        <div className="loading-message">
           Loading your wardrobe...
         </div>
       </div>
@@ -130,117 +175,223 @@ function OutfitBuilder() {
 
   if (error) {
     return (
-      <div className="outfit-builder">
-        <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>
+      <div className="outfit-builder-simple">
+        <div className="error-message">
           {error}
         </div>
       </div>
     );
   }
 
-  const categories = ['Tops', 'Bottoms', 'Shoes', 'Accessories'];
+  const currentItem = getCurrentItem();
+  const currentCategory = getCurrentCategory();
+  const currentItems = getCurrentItems();
 
   return (
-    <div className="outfit-builder">
-      <div className="outfit-builder-header">
-        <h1>Build Your Outfit</h1>
-        <p>Mix and match your wardrobe items to create the perfect outfit!</p>
-      </div>
-
-      <div className="outfit-builder-content">
-        <div className="outfit-preview">
-          <h2>Your Outfit</h2>
-          <div className="outfit-display">
-            {selectedOutfit.tops && (
-              <div className="outfit-item">
+    <div className="outfit-builder-stacked">
+      {/* Stacked Outfit Display */}
+      <div className="outfit-stack">
+        {/* Tops Section */}
+        <div className="outfit-category-stack">
+          <button 
+            className="nav-arrow-stack left" 
+            onClick={() => {
+              const topsItems = getItemsByCategory('Tops');
+              if (topsItems.length > 0) {
+                const currentTopsIndex = selectedOutfit.tops ? 
+                  topsItems.findIndex(item => item._id === selectedOutfit.tops._id) : 0;
+                const prevIndex = currentTopsIndex === 0 ? topsItems.length - 1 : currentTopsIndex - 1;
+                setSelectedOutfit(prev => ({ ...prev, tops: topsItems[prevIndex] }));
+              }
+            }}
+            disabled={getItemsByCategory('Tops').length === 0}
+          >
+            ‹
+          </button>
+          
+          <div className="outfit-item-stack" onClick={() => {
+            const topsItems = getItemsByCategory('Tops');
+            if (topsItems.length > 0) {
+              if (selectedOutfit.tops) {
+                const currentTopsIndex = topsItems.findIndex(item => item._id === selectedOutfit.tops._id);
+                const nextIndex = (currentTopsIndex + 1) % topsItems.length;
+                setSelectedOutfit(prev => ({ ...prev, tops: topsItems[nextIndex] }));
+              } else {
+                setSelectedOutfit(prev => ({ ...prev, tops: topsItems[0] }));
+              }
+            }
+          }}>
+            {selectedOutfit.tops ? (
+              <>
                 <img src={getImageUrl(selectedOutfit.tops.imageUrl)} alt={selectedOutfit.tops.name} />
-                <p>{selectedOutfit.tops.name}</p>
-              </div>
-            )}
-            {selectedOutfit.bottoms && (
-              <div className="outfit-item">
-                <img src={getImageUrl(selectedOutfit.bottoms.imageUrl)} alt={selectedOutfit.bottoms.name} />
-                <p>{selectedOutfit.bottoms.name}</p>
-              </div>
-            )}
-            {selectedOutfit.shoes && (
-              <div className="outfit-item">
-                <img src={getImageUrl(selectedOutfit.shoes.imageUrl)} alt={selectedOutfit.shoes.name} />
-                <p>{selectedOutfit.shoes.name}</p>
-              </div>
-            )}
-            {selectedOutfit.accessories?.map(accessory => (
-              <div key={accessory._id} className="outfit-item accessory">
-                <img src={getImageUrl(accessory.imageUrl)} alt={accessory.name} />
-                <p>{accessory.name}</p>
-              </div>
-            ))}
-            {!selectedOutfit.tops && !selectedOutfit.bottoms && !selectedOutfit.shoes && selectedOutfit.accessories?.length === 0 && (
-              <div className="empty-outfit">
-                <p>Start building your outfit by selecting items below!</p>
+                <span className="category-label-stack">Tops</span>
+              </>
+            ) : (
+              <div className="empty-item-stack">
+                <span>No Top</span>
               </div>
             )}
           </div>
           
-          <div className="outfit-actions">
-            <button onClick={clearOutfit} className="clear-btn">
-              Clear Outfit
-            </button>
-            <button onClick={saveOutfit} className="save-btn">
-              Save Outfit
-            </button>
-          </div>
+          <button 
+            className="nav-arrow-stack right" 
+            onClick={() => {
+              const topsItems = getItemsByCategory('Tops');
+              if (topsItems.length > 0) {
+                if (selectedOutfit.tops) {
+                  const currentTopsIndex = topsItems.findIndex(item => item._id === selectedOutfit.tops._id);
+                  const nextIndex = (currentTopsIndex + 1) % topsItems.length;
+                  setSelectedOutfit(prev => ({ ...prev, tops: topsItems[nextIndex] }));
+                } else {
+                  setSelectedOutfit(prev => ({ ...prev, tops: topsItems[0] }));
+                }
+              }
+            }}
+            disabled={getItemsByCategory('Tops').length === 0}
+          >
+            ›
+          </button>
         </div>
 
-        <div className="wardrobe-section">
-          <div className="navigation-buttons">
-            <button onClick={() => navigate('/wardrobe')} className="nav-btn">
-              📁 My Wardrobe
-            </button>
-            <button onClick={() => navigate('/upload')} className="nav-btn">
-              ➕ Add Item
-            </button>
-          </div>
-
-          <div className="category-tabs">
-            {categories.map(category => (
-              <div key={category} className="category-section">
-                <h3>{category}</h3>
-                <div className="items-grid">
-                  {getItemsByCategory(category).length === 0 ? (
-                    <div className="no-items">
-                      <p>No {category.toLowerCase()} yet.</p>
-                      <button onClick={() => navigate('/upload')} className="add-item-btn">
-                        Add {category.slice(0, -1)}
-                      </button>
-                    </div>
-                  ) : (
-                    getItemsByCategory(category).map(item => (
-                      <div
-                        key={item._id}
-                        className={`item-card ${isItemSelected(item, category) ? 'selected' : ''}`}
-                        onClick={() => selectItem(item, category)}
-                      >
-                        <img 
-                          src={getImageUrl(item.imageUrl)} 
-                          alt={item.name}
-                          onError={(e) => {
-                            console.error('Image failed to load:', getImageUrl(item.imageUrl));
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                        <h4>{item.name}</h4>
-                        {isItemSelected(item, category) && (
-                          <div className="selected-indicator">✓</div>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
+        {/* Bottoms Section */}
+        <div className="outfit-category-stack">
+          <button 
+            className="nav-arrow-stack left" 
+            onClick={() => {
+              const bottomsItems = getItemsByCategory('Bottoms');
+              if (bottomsItems.length > 0) {
+                if (selectedOutfit.bottoms) {
+                  const currentBottomsIndex = bottomsItems.findIndex(item => item._id === selectedOutfit.bottoms._id);
+                  const prevIndex = currentBottomsIndex === 0 ? bottomsItems.length - 1 : currentBottomsIndex - 1;
+                  setSelectedOutfit(prev => ({ ...prev, bottoms: bottomsItems[prevIndex] }));
+                } else {
+                  setSelectedOutfit(prev => ({ ...prev, bottoms: bottomsItems[bottomsItems.length - 1] }));
+                }
+              }
+            }}
+            disabled={getItemsByCategory('Bottoms').length === 0}
+          >
+            ‹
+          </button>
+          
+          <div className="outfit-item-stack" onClick={() => {
+            const bottomsItems = getItemsByCategory('Bottoms');
+            if (bottomsItems.length > 0) {
+              if (selectedOutfit.bottoms) {
+                const currentBottomsIndex = bottomsItems.findIndex(item => item._id === selectedOutfit.bottoms._id);
+                const nextIndex = (currentBottomsIndex + 1) % bottomsItems.length;
+                setSelectedOutfit(prev => ({ ...prev, bottoms: bottomsItems[nextIndex] }));
+              } else {
+                setSelectedOutfit(prev => ({ ...prev, bottoms: bottomsItems[0] }));
+              }
+            }
+          }}>
+            {selectedOutfit.bottoms ? (
+              <>
+                <img src={getImageUrl(selectedOutfit.bottoms.imageUrl)} alt={selectedOutfit.bottoms.name} />
+                <span className="category-label-stack">Bottoms</span>
+              </>
+            ) : (
+              <div className="empty-item-stack">
+                <span>No Bottom</span>
               </div>
-            ))}
+            )}
           </div>
+          
+          <button 
+            className="nav-arrow-stack right" 
+            onClick={() => {
+              const bottomsItems = getItemsByCategory('Bottoms');
+              if (bottomsItems.length > 0) {
+                if (selectedOutfit.bottoms) {
+                  const currentBottomsIndex = bottomsItems.findIndex(item => item._id === selectedOutfit.bottoms._id);
+                  const nextIndex = (currentBottomsIndex + 1) % bottomsItems.length;
+                  setSelectedOutfit(prev => ({ ...prev, bottoms: bottomsItems[nextIndex] }));
+                } else {
+                  setSelectedOutfit(prev => ({ ...prev, bottoms: bottomsItems[0] }));
+                }
+              }
+            }}
+            disabled={getItemsByCategory('Bottoms').length === 0}
+          >
+            ›
+          </button>
         </div>
+
+        {/* Shoes Section */}
+        <div className="outfit-category-stack">
+          <button 
+            className="nav-arrow-stack left" 
+            onClick={() => {
+              const shoesItems = getItemsByCategory('Shoes');
+              if (shoesItems.length > 0) {
+                if (selectedOutfit.shoes) {
+                  const currentShoesIndex = shoesItems.findIndex(item => item._id === selectedOutfit.shoes._id);
+                  const prevIndex = currentShoesIndex === 0 ? shoesItems.length - 1 : currentShoesIndex - 1;
+                  setSelectedOutfit(prev => ({ ...prev, shoes: shoesItems[prevIndex] }));
+                } else {
+                  setSelectedOutfit(prev => ({ ...prev, shoes: shoesItems[shoesItems.length - 1] }));
+                }
+              }
+            }}
+            disabled={getItemsByCategory('Shoes').length === 0}
+          >
+            ‹
+          </button>
+          
+          <div className="outfit-item-stack" onClick={() => {
+            const shoesItems = getItemsByCategory('Shoes');
+            if (shoesItems.length > 0) {
+              if (selectedOutfit.shoes) {
+                const currentShoesIndex = shoesItems.findIndex(item => item._id === selectedOutfit.shoes._id);
+                const nextIndex = (currentShoesIndex + 1) % shoesItems.length;
+                setSelectedOutfit(prev => ({ ...prev, shoes: shoesItems[nextIndex] }));
+              } else {
+                setSelectedOutfit(prev => ({ ...prev, shoes: shoesItems[0] }));
+              }
+            }
+          }}>
+            {selectedOutfit.shoes ? (
+              <>
+                <img src={getImageUrl(selectedOutfit.shoes.imageUrl)} alt={selectedOutfit.shoes.name} />
+                <span className="category-label-stack">Shoes</span>
+              </>
+            ) : (
+              <div className="empty-item-stack">
+                <span>No Shoes</span>
+              </div>
+            )}
+          </div>
+          
+          <button 
+            className="nav-arrow-stack right" 
+            onClick={() => {
+              const shoesItems = getItemsByCategory('Shoes');
+              if (shoesItems.length > 0) {
+                if (selectedOutfit.shoes) {
+                  const currentShoesIndex = shoesItems.findIndex(item => item._id === selectedOutfit.shoes._id);
+                  const nextIndex = (currentShoesIndex + 1) % shoesItems.length;
+                  setSelectedOutfit(prev => ({ ...prev, shoes: shoesItems[nextIndex] }));
+                } else {
+                  setSelectedOutfit(prev => ({ ...prev, shoes: shoesItems[0] }));
+                }
+              }
+            }}
+            disabled={getItemsByCategory('Shoes').length === 0}
+          >
+            ›
+          </button>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="action-buttons">
+        <button onClick={clearOutfit} className="action-btn clear">
+          Clear All
+        </button>
+        <button onClick={saveOutfit} className="action-btn save">
+          Save Outfit
+        </button>
       </div>
     </div>
   );

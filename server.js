@@ -125,7 +125,7 @@ app.post('/api/login', async (req, res) => {
   res.json({ message: 'Login successful', token });
 });
 
-// Google OAuth routes
+// ,oooGoogle OAuth routes
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), (req, res) => {
   // Successful authentication, redirect to frontend with token
