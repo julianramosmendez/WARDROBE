@@ -366,6 +366,22 @@ app.post('/api/convert-heic', authenticateToken, async (req, res) => {
   }
 });
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Wardrobe API Server is running!',
+    endpoints: {
+      test: '/api/test',
+      register: 'POST /api/register',
+      login: 'POST /api/login',
+      upload: 'POST /api/upload',
+      wardrobe: 'GET /api/wardrobe',
+      addItem: 'POST /api/wardrobe',
+      deleteItem: 'DELETE /api/wardrobe/:itemId'
+    }
+  });
+});
+
 // Test route
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Backend is working!' });
