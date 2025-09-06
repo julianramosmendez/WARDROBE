@@ -20,6 +20,7 @@ function Navbar() {
         <Link to="/">Build Outfit</Link>
         <Link to="/wardrobe">My Wardrobe</Link>
         <Link to="/upload">Upload Item</Link>
+        <Link to="/profile">Profile</Link>
         {!isLoggedIn ? (
           <>
             <Link to="/login">Login</Link>

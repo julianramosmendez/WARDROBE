@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -12,6 +13,19 @@ const sharp = require('sharp');
 const heicConvert = require('heic-convert');
 const User = require('./models/User');
 const ClothingItem = require('./models/ClothingItem');
+
+// Outfit Schema
+const OutfitSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  name: { type: String, required: true },
+  tops: { type: Object },
+  bottoms: { type: Object },
+  shoes: { type: Object },
+  accessories: [{ type: Object }],
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Outfit = mongoose.model('Outfit', OutfitSchema);
 const app = express();
 
 // Middleware
@@ -52,14 +66,14 @@ async function convertHeicToJpeg(inputPath, outputPath) {
 }
 
 // MongoDB connection
-mongoose.connect('mongodb+srv://julianramosmendez:iYEd5BQazQwE91SX@cluster0.0k4vpyh.mongodb.net/wardrobe?retryWrites=true&w=majority&appName=Cluster0', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://julianramosmendez:iYEd5BQazQwE91SX@cluster0.0k4vpyh.mongodb.net/wardrobe?retryWrites=true&w=majority&appName=Cluster0', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
 // Session and Passport setup
 app.use(session({
-  secret: 'wardrobe_secret',
+  secret: process.env.SESSION_SECRET || 'wardrobe_secret',
   resave: false,
   saveUninitialized: false,
 }));
@@ -121,7 +135,7 @@ app.post('/api/login', async (req, res) => {
   if (!user) return res.status(400).json({ error: 'Invalid credentials' });
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) return res.status(400).json({ error: 'Invalid credentials' });
-  const token = jwt.sign({ id: user._id, username: user.username }, 'wardrobe_jwt_secret', { expiresIn: '1d' });
+  const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET || 'wardrobe_jwt_secret', { expiresIn: '1d' });
   res.json({ message: 'Login successful', token });
 });
 
@@ -140,7 +154,7 @@ const authenticateToken = (req, res, next) => {
   
   if (!token) return res.status(401).json({ error: 'Access token required' });
   
-  jwt.verify(token, 'wardrobe_jwt_secret', (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET || 'wardrobe_jwt_secret', (err, user) => {
     if (err) return res.status(403).json({ error: 'Invalid token' });
     req.user = user;
     next();
@@ -157,7 +171,8 @@ app.post('/api/upload', authenticateToken, upload.single('image'), async (req, r
     });
     
     let finalFilename = req.file.filename;
-    let imageUrl = `http://localhost:5003/uploads/${finalFilename}`;
+    const baseUrl = process.env.BASE_URL || 'http://localhost:5003';
+    let imageUrl = `${baseUrl}/uploads/${finalFilename}`;
     const fs = require('fs');
     
     // Convert HEIC to JPEG if needed
@@ -178,7 +193,7 @@ app.post('/api/upload', authenticateToken, upload.single('image'), async (req, r
         fs.unlinkSync(inputPath);
         
         finalFilename = jpegFilename;
-        imageUrl = `http://localhost:5003/uploads/${jpegFilename}`;
+        imageUrl = `${baseUrl}/uploads/${jpegFilename}`;
         console.log('HEIC conversion complete. New filename:', finalFilename);
       } else {
         // If conversion fails, try using Sharp as fallback
@@ -191,7 +206,7 @@ app.post('/api/upload', authenticateToken, upload.single('image'), async (req, r
           fs.unlinkSync(inputPath);
           
           finalFilename = jpegFilename;
-          imageUrl = `http://localhost:5003/uploads/${jpegFilename}`;
+          imageUrl = `${baseUrl}/uploads/${jpegFilename}`;
           console.log('HEIC conversion complete using Sharp fallback. New filename:', finalFilename);
         } catch (sharpError) {
           console.error('Both HEIC conversion methods failed:', sharpError);
@@ -363,6 +378,67 @@ app.post('/api/convert-heic', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('HEIC conversion error:', error);
     res.status(500).json({ error: 'Error converting HEIC files' });
+  }
+});
+
+// Save outfit
+app.post('/api/outfits', authenticateToken, async (req, res) => {
+  try {
+    const { name, tops, bottoms, shoes, accessories } = req.body;
+    
+    const outfit = await Outfit.create({
+      userId: req.user.id,
+      name: name || 'Untitled Outfit',
+      tops,
+      bottoms,
+      shoes,
+      accessories: accessories || []
+    });
+    
+    res.json({ 
+      message: 'Outfit saved successfully', 
+      outfit: outfit 
+    });
+  } catch (error) {
+    console.error('Save outfit error:', error);
+    res.status(500).json({ error: 'Error saving outfit' });
+  }
+});
+
+// Get all saved outfits for user
+app.get('/api/outfits', authenticateToken, async (req, res) => {
+  try {
+    const outfits = await Outfit.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    res.json({ 
+      message: 'Get saved outfits', 
+      outfits: outfits 
+    });
+  } catch (error) {
+    console.error('Get outfits error:', error);
+    res.status(500).json({ error: 'Error fetching outfits' });
+  }
+});
+
+// Delete outfit
+app.delete('/api/outfits/:outfitId', authenticateToken, async (req, res) => {
+  try {
+    const { outfitId } = req.params;
+    
+    const outfit = await Outfit.findOne({ _id: outfitId, userId: req.user.id });
+    
+    if (!outfit) {
+      return res.status(404).json({ error: 'Outfit not found' });
+    }
+    
+    await Outfit.findByIdAndDelete(outfitId);
+    
+    res.json({ 
+      message: 'Outfit deleted successfully', 
+      deletedOutfit: outfit 
+    });
+  } catch (error) {
+    console.error('Delete outfit error:', error);
+    res.status(500).json({ error: 'Error deleting outfit' });
   }
 });
 

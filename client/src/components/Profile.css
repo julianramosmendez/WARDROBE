@@ -1,0 +1,262 @@
+/* Profile Container */
+.profile-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.profile-header h1 {
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 200;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem 0;
+}
+
+.profile-header p {
+  color: #cccccc;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.loading-message,
+.error-message {
+  text-align: center;
+  padding: 3rem;
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+.error-message {
+  color: #ff6b6b;
+}
+
+/* No Outfits State */
+.no-outfits {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #111111;
+  border-radius: 12px;
+  border: 1px solid #333333;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.no-outfits h2 {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 300;
+  margin: 0 0 1rem 0;
+}
+
+.no-outfits p {
+  color: #cccccc;
+  margin: 0 0 2rem 0;
+}
+
+.create-outfit-btn {
+  padding: 1rem 2rem;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 300;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.create-outfit-btn:hover {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Outfits Grid */
+.outfits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.outfit-card {
+  background: #111111;
+  border-radius: 12px;
+  border: 1px solid #333333;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.outfit-card:hover {
+  border-color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+}
+
+.outfit-preview {
+  padding: 1.5rem;
+  background: #000000;
+}
+
+.outfit-items-preview {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 0.75rem;
+  min-width: 80px;
+  transition: all 0.3s ease;
+}
+
+.preview-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.preview-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.preview-item span {
+  color: #000000;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.outfit-info {
+  padding: 1.5rem;
+}
+
+.outfit-info h3 {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 300;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.outfit-date {
+  color: #cccccc;
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+}
+
+.outfit-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.delete-btn {
+  padding: 0.5rem 1rem;
+  background: #000000;
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 300;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+  background: #ff6b6b;
+  color: #000000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 1rem;
+  }
+  
+  .profile-header h1 {
+    font-size: 2rem;
+  }
+  
+  .outfits-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .outfit-preview {
+    padding: 1rem;
+  }
+  
+  .outfit-items-preview {
+    gap: 0.75rem;
+  }
+  
+  .preview-item {
+    min-width: 70px;
+    padding: 0.5rem;
+  }
+  
+  .preview-item img {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .outfit-info {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 0.5rem;
+  }
+  
+  .profile-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .outfits-grid {
+    gap: 1rem;
+  }
+  
+  .outfit-items-preview {
+    gap: 0.5rem;
+  }
+  
+  .preview-item {
+    min-width: 60px;
+    padding: 0.4rem;
+  }
+  
+  .preview-item img {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .preview-item span {
+    font-size: 0.6rem;
+  }
+}

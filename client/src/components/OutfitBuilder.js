@@ -159,8 +159,47 @@ function OutfitBuilder() {
   };
 
   const saveOutfit = async () => {
-    // TODO: Implement outfit saving functionality
-    alert('Outfit saved! (Feature coming soon)');
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please log in to save outfits');
+        return;
+      }
+
+      // Check if at least one item is selected
+      if (!selectedOutfit.tops && !selectedOutfit.bottoms && !selectedOutfit.shoes && selectedOutfit.accessories?.length === 0) {
+        alert('Please select at least one item to save the outfit');
+        return;
+      }
+
+      const outfitName = prompt('Enter a name for your outfit:', 'My Outfit');
+      if (!outfitName) return;
+
+      const response = await fetch('/api/outfits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: outfitName,
+          tops: selectedOutfit.tops,
+          bottoms: selectedOutfit.bottoms,
+          shoes: selectedOutfit.shoes,
+          accessories: selectedOutfit.accessories
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save outfit');
+      }
+
+      const data = await response.json();
+      alert('Outfit saved successfully!');
+    } catch (err) {
+      console.error('Save outfit error:', err);
+      alert('Error saving outfit. Please try again.');
+    }
   };
 
   if (loading) {

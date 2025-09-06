@@ -11,6 +11,7 @@ import Signup from './components/Signup';
 import ProtectedRoute from './components/ProtectedRoute';
 import ItemDetail from './components/ItemDetail';
 import OutfitBuilder from './components/OutfitBuilder';
+import Profile from './components/Profile';
 
 function App() {
   return (
@@ -37,6 +38,11 @@ function App() {
             <Route path="/item/:itemId" element={
               <ProtectedRoute>
                 <ItemDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             } />
             <Route path="/login" element={<Login />} />
