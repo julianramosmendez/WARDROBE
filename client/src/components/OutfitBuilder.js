@@ -421,6 +421,86 @@ function OutfitBuilder() {
             ›
           </button>
         </div>
+
+        {/* Accessories Section */}
+<div className="outfit-category-stack">
+  <button 
+    className="nav-arrow-stack left"
+    onClick={() => {
+      const accessoriesItems = getItemsByCategory('Accessories');
+      if (accessoriesItems.length > 0) {
+        setSelectedOutfit(prev => {
+          const currentIndex = prev.accessories?.length
+            ? accessoriesItems.findIndex(item => item._id === prev.accessories[0]._id)
+            : 0;
+          const prevIndex = currentIndex === 0 ? accessoriesItems.length - 1 : currentIndex - 1;
+          return {
+            ...prev,
+            accessories: [accessoriesItems[prevIndex]]
+          };
+        });
+      }
+    }}
+    disabled={getItemsByCategory('Accessories').length === 0}
+  >
+    ‹
+  </button>
+
+  <div 
+    className="outfit-item-stack"
+    onClick={() => {
+      const accessoriesItems = getItemsByCategory('Accessories');
+      if (accessoriesItems.length > 0) {
+        const firstAcc = accessoriesItems[0];
+        setSelectedOutfit(prev => {
+          const alreadySelected = prev.accessories?.some(acc => acc._id === firstAcc._id);
+          return {
+            ...prev,
+            accessories: alreadySelected
+              ? prev.accessories.filter(acc => acc._id !== firstAcc._id)
+              : [...(prev.accessories || []), firstAcc]
+          };
+        });
+      }
+    }}
+  >
+    {selectedOutfit.accessories?.length > 0 ? (
+      <>
+        <img 
+          src={getImageUrl(selectedOutfit.accessories[0].imageUrl)} 
+          alt={selectedOutfit.accessories[0].name} 
+        />
+        <span className="category-label-stack">Accessories</span>
+      </>
+    ) : (
+      <div className="empty-item-stack">
+        <span>No Accessories</span>
+      </div>
+    )}
+  </div>
+
+  <button 
+    className="nav-arrow-stack right"
+    onClick={() => {
+      const accessoriesItems = getItemsByCategory('Accessories');
+      if (accessoriesItems.length > 0) {
+        setSelectedOutfit(prev => {
+          const currentIndex = prev.accessories?.length
+            ? accessoriesItems.findIndex(item => item._id === prev.accessories[0]._id)
+            : 0;
+          const nextIndex = (currentIndex + 1) % accessoriesItems.length;
+          return {
+            ...prev,
+            accessories: [accessoriesItems[nextIndex]]
+          };
+        });
+      }
+    }}
+    disabled={getItemsByCategory('Accessories').length === 0}
+  >
+    ›
+  </button>
+</div>
       </div>
 
       {/* Action Buttons */}
