@@ -4,32 +4,23 @@ import './OutfitBuilder.css';
 
 function OutfitBuilder() {
   const navigate = useNavigate();
+  const [layeringEnabled, setLayeringEnabled] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedOutfit, setSelectedOutfit] = useState({
-    tops: null,
+    tops: [],
     bottoms: null,
     shoes: null,
     accessories: []
   });
-  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
-  const [currentItemIndex, setCurrentItemIndex] = useState(0);
+  
 
   // Function to ensure image URLs are correct
   const getImageUrl = (imageUrl) => {
-    if (!imageUrl) {
-      return '';
-    }
-    
-    if (imageUrl.startsWith('http')) {
-      return imageUrl;
-    }
-    
-    if (imageUrl.startsWith('/uploads/')) {
-      return `http://localhost:5003${imageUrl}`;
-    }
-    
+    if (!imageUrl) return '';
+    if (imageUrl.startsWith('http')) return imageUrl;
+    if (imageUrl.startsWith('/uploads/')) return `http://localhost:5003${imageUrl}`;
     return `http://localhost:5003/uploads/${imageUrl}`;
   };
 
@@ -47,14 +38,10 @@ function OutfitBuilder() {
       }
 
       const response = await fetch('/api/wardrobe', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: {'Authorization': `Bearer ${token}`}
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch items');
-      }
+      if (!response.ok) throw new Error('Failed to fetch items');
 
       const data = await response.json();
       setItems(data.items);
@@ -71,93 +58,86 @@ function OutfitBuilder() {
     return items.filter(item => item.category === category);
   };
 
-  const getCurrentCategory = () => {
-    return categories[currentCategoryIndex];
-  };
+  const navigateCategoryItems = (category, direction) => {
+    const categoryItems = getItemsByCategory(category);
+    if(categoryItems.length === 0) return null;
 
-  const getCurrentItems = () => {
-    return getItemsByCategory(getCurrentCategory());
-  };
+    const currentItem = selectedOutfit[category.toLowerCase()];
+    const currentIndex = currentItem
+      ? categoryItems.findIndex(item => item._id === currentItem._id)
+      : -1;
 
-  const getCurrentItem = () => {
-    const currentItems = getCurrentItems();
-    return currentItems[currentItemIndex] || null;
-  };
-
-  const navigateItems = (direction) => {
-    const currentItems = getCurrentItems();
-    if (currentItems.length === 0) return;
-
-    if (direction === 'next') {
-      setCurrentItemIndex(prev => (prev + 1) % currentItems.length);
+    let newIndex;
+    if(direction === 'next'){
+      newIndex = (currentIndex + 1) % categoryItems.length;
     } else {
-      setCurrentItemIndex(prev => prev === 0 ? currentItems.length - 1 : prev - 1);
+      newIndex = currentIndex === 0 ? categoryItems.length - 1 : currentIndex - 1;
     }
+
+    return categoryItems[newIndex]
   };
-
-  const navigateCategories = (direction) => {
-    if (direction === 'next') {
-      setCurrentCategoryIndex(prev => (prev + 1) % categories.length);
-    } else {
-      setCurrentCategoryIndex(prev => prev === 0 ? categories.length - 1 : prev - 1);
-    }
-    setCurrentItemIndex(0); // Reset item index when changing categories
-  };
-
-  const selectCurrentItem = () => {
-    const currentItem = getCurrentItem();
-    const currentCategory = getCurrentCategory();
-    
-    if (!currentItem) return;
-
-    if (currentCategory === 'Accessories') {
-      // For accessories, toggle selection (multiple allowed)
-      setSelectedOutfit(prev => {
-        const currentAccessories = prev.accessories || [];
-        const isSelected = currentAccessories.some(acc => acc._id === currentItem._id);
-        
-        if (isSelected) {
-          return {
-            ...prev,
-            accessories: currentAccessories.filter(acc => acc._id !== currentItem._id)
-          };
-        } else {
-          return {
-            ...prev,
-            accessories: [...currentAccessories, currentItem]
-          };
-        }
-      });
-    } else {
-      // For other categories, single selection
-      setSelectedOutfit(prev => ({
-        ...prev,
-        [currentCategory.toLowerCase()]: currentItem
-      }));
-    }
-  };
-
-  const isCurrentItemSelected = () => {
-    const currentItem = getCurrentItem();
-    const currentCategory = getCurrentCategory();
-    
-    if (!currentItem) return false;
-    
-    if (currentCategory === 'Accessories') {
-      return selectedOutfit.accessories?.some(acc => acc._id === currentItem._id) || false;
-    }
-    return selectedOutfit[currentCategory.toLowerCase()]?._id === currentItem._id;
-  };
-
+ 
   const clearOutfit = () => {
     setSelectedOutfit({
-      tops: null,
+      tops: [],
       bottoms: null,
       shoes: null,
       accessories: []
     });
   };
 
+  const addLayer = (category, item) => {
+    const categoryKey = category.toLowerCase();
+    
+    setSelectedOutfit(prev => {
+      if(Array.isArray(prev[categoryKey])) {
+        return{
+          ...prev,
+         [categoryKey]: [...prev[categoryKey], item]
+        };
+    } else {
+      return {
+        ...prev,
+        [categoryKey]: item
+    };
+  }
+});
+};
+
+  const removeLayer = (category, index) => {
+    setSelectedOutfit(prev => ({
+      ...prev,
+      [category]: Array.isArray(prev[category])
+      ? prev[category].filter((_, i) => i !== index)
+      : null
+    }));
+  };
+
+  const navigateLayer = (category, itemIndex, direction) => {
+    const categoryItems = getItemsByCategory(category);
+    if (categoryItems.length === 0) return;
+
+    setSelectedOutfit(prev => {
+      const currentItems = [...prev[category]];
+      const currentItem = currentItems[itemIndex];
+      const currentIndex = categoryItems.findIndex(item => item._id === currentItem._id);
+
+      let newIndex;
+      if (direction == 'next') {
+        newIndex = (currentIndex + 1) % categoryItems.length;
+      } else {
+        newIndex = currentIndex === 0 ? categoryItems.length - 1 : currentIndex - 1;
+      }
+
+      const newItems = [...currentItems];
+      newItems[itemIndex] = categoryItems[newIndex];
+
+      return {
+        ...prev,
+        [category]: newItems
+      };
+    });
+  };
   const saveOutfit = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -202,93 +182,71 @@ function OutfitBuilder() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="outfit-builder-simple">
-        <div className="loading-message">
-          Loading your wardrobe...
-        </div>
-      </div>
-    );
-  }
 
-  if (error) {
-    return (
-      <div className="outfit-builder-simple">
-        <div className="error-message">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
-  const currentItem = getCurrentItem();
-  const currentCategory = getCurrentCategory();
-  const currentItems = getCurrentItems();
 
   return (
+    <div className="outfit-builder">
+
+      {/* layering toggle */}
+      <div className="layer-toggle">
+        <label>
+          <input
+            type="checkbox"
+            checked={layeringEnabled}
+            onChange={() => setLayeringEnabled(!layeringEnabled)}
+          />
+          Enable Layering
+        </label>
+      </div>
+    
     <div className="outfit-builder-stacked">
       {/* Stacked Outfit Display */}
-      <div className="outfit-stack">
+      
         {/* Tops Section */}
         <div className="outfit-category-stack">
-          <button 
-            className="nav-arrow-stack left" 
-            onClick={() => {
-              const topsItems = getItemsByCategory('Tops');
-              if (topsItems.length > 0) {
-                const currentTopsIndex = selectedOutfit.tops ? 
-                  topsItems.findIndex(item => item._id === selectedOutfit.tops._id) : 0;
-                const prevIndex = currentTopsIndex === 0 ? topsItems.length - 1 : currentTopsIndex - 1;
-                setSelectedOutfit(prev => ({ ...prev, tops: topsItems[prevIndex] }));
-              }
-            }}
-            disabled={getItemsByCategory('Tops').length === 0}
-          >
-            ‹
-          </button>
+          <span className="category-label-stack">Tops</span>
           
-          <div className="outfit-item-stack" onClick={() => {
-            const topsItems = getItemsByCategory('Tops');
-            if (topsItems.length > 0) {
-              if (selectedOutfit.tops) {
-                const currentTopsIndex = topsItems.findIndex(item => item._id === selectedOutfit.tops._id);
-                const nextIndex = (currentTopsIndex + 1) % topsItems.length;
-                setSelectedOutfit(prev => ({ ...prev, tops: topsItems[nextIndex] }));
-              } else {
-                setSelectedOutfit(prev => ({ ...prev, tops: topsItems[0] }));
-              }
-            }
-          }}>
-            {selectedOutfit.tops ? (
-              <>
-                <img src={getImageUrl(selectedOutfit.tops.imageUrl)} alt={selectedOutfit.tops.name} />
-                <span className="category-label-stack">Tops</span>
-              </>
-            ) : (
-              <div className="empty-item-stack">
-                <span>No Top</span>
+          {selectedOutfit.tops.length > 0 ? (
+           selectedOutfit.tops.map((top, idx) => (
+            <div key={idx} className="layered-item-container">
+              <button
+                className="nav-arrow-stack left"
+                onClick={() => navigateLayer('tops', idx, 'prev')}
+                disabled={getItemsByCategory('Tops').length === 0}
+              >
+                ‹
+              </button>
+           <div className="layered-item">
+            <img
+              src={getImageUrl(top.imageUrl)}
+              alt={top.name}
+              className="outfit-item stacked"
+              />
+              <button onClick={() => removeLayer("tops", idx)}>✕</button>
               </div>
-            )}
-          </div>
-          
-          <button 
-            className="nav-arrow-stack right" 
-            onClick={() => {
-              const topsItems = getItemsByCategory('Tops');
-              if (topsItems.length > 0) {
-                if (selectedOutfit.tops) {
-                  const currentTopsIndex = topsItems.findIndex(item => item._id === selectedOutfit.tops._id);
-                  const nextIndex = (currentTopsIndex + 1) % topsItems.length;
-                  setSelectedOutfit(prev => ({ ...prev, tops: topsItems[nextIndex] }));
-                } else {
-                  setSelectedOutfit(prev => ({ ...prev, tops: topsItems[0] }));
-                }
-              }
-            }}
-            disabled={getItemsByCategory('Tops').length === 0}
-          >
-            ›
+
+              <button
+                className="nav-arrow-stack right"
+                onClick={() => navigateLayer('tops', idx, 'next')}
+                disabled={getItemsByCategory('Tops').length === 0}
+              >
+                ›
+              </button>
+            </div>
+          ))
+        ) :(
+          <div className="empty-item-stack">No Top</div>
+        )}
+        <button 
+          className="add-layer-btn"
+          onClick={() => {
+            const tops = getItemsByCategory("Tops");
+            if(tops.length > 0) {
+              addLayer("tops", tops[0]);
+            }
+          }}
+        >
+            + Add Layer
           </button>
         </div>
 
@@ -424,96 +382,70 @@ function OutfitBuilder() {
 
         {/* Accessories Section */}
 <div className="outfit-category-stack">
+  <span className="category-label-stack">Accessories</span>
+  
+  {selectedOutfit.accessories.length > 0 ? (
+    selectedOutfit.accessories.map( (acc, idx) => (
+      
+      <div key={idx} className="layered-item-container">
+        <button 
+          className="nav-arrow-stack left"
+          onClick={() => navigateLayer('accessories', idx, 'prev')}
+          disabled={getItemsByCategory('Accessories').length === 0}
+      >
+        ‹
+      </button>
+
+      <div className="layered-item">
+        <img
+          src={getImageUrl(acc.imageUrl)}
+          alt={acc.name}
+          className="outfit-item stacked"
+      />
+      <button onClick={() => removeLayer("accessories", idx)}>✕</button>
+    </div>
+    <button
+      className="nav-arrow-stack right"
+      onClick={() => navigateLayer('accessories', idx, 'next')}
+      disabled={getItemsByCategory('Accessories').length === 0}
+    >
+      ›
+    </button>
+    </div>
+    ))
+  ) : (
+    <div className="empty-item-stack"> No Accessories</div>
+  
+  )}
   <button 
-    className="nav-arrow-stack left"
+    className="add-layer-btn"
     onClick={() => {
-      const accessoriesItems = getItemsByCategory('Accessories');
-      if (accessoriesItems.length > 0) {
-        setSelectedOutfit(prev => {
-          const currentIndex = prev.accessories?.length
-            ? accessoriesItems.findIndex(item => item._id === prev.accessories[0]._id)
-            : 0;
-          const prevIndex = currentIndex === 0 ? accessoriesItems.length - 1 : currentIndex - 1;
-          return {
-            ...prev,
-            accessories: [accessoriesItems[prevIndex]]
-          };
-        });
+      const accs = getItemsByCategory("Accessories");
+      if (accs.length > 0) {
+        addLayer("accessories", accs[0]);
       }
     }}
-    disabled={getItemsByCategory('Accessories').length === 0}
   >
-    ‹
+    + Add Layer
   </button>
+</div> {/* closses outfit-category-stack */}
 
-  <div 
-    className="outfit-item-stack"
-    onClick={() => {
-      const accessoriesItems = getItemsByCategory('Accessories');
-      if (accessoriesItems.length > 0) {
-        const firstAcc = accessoriesItems[0];
-        setSelectedOutfit(prev => {
-          const alreadySelected = prev.accessories?.some(acc => acc._id === firstAcc._id);
-          return {
-            ...prev,
-            accessories: alreadySelected
-              ? prev.accessories.filter(acc => acc._id !== firstAcc._id)
-              : [...(prev.accessories || []), firstAcc]
-          };
-        });
-      }
-    }}
-  >
-    {selectedOutfit.accessories?.length > 0 ? (
-      <>
-        <img 
-          src={getImageUrl(selectedOutfit.accessories[0].imageUrl)} 
-          alt={selectedOutfit.accessories[0].name} 
-        />
-        <span className="category-label-stack">Accessories</span>
-      </>
-    ) : (
-      <div className="empty-item-stack">
-        <span>No Accessories</span>
-      </div>
-    )}
-  </div>
+</div>
+      
 
-  <button 
-    className="nav-arrow-stack right"
-    onClick={() => {
-      const accessoriesItems = getItemsByCategory('Accessories');
-      if (accessoriesItems.length > 0) {
-        setSelectedOutfit(prev => {
-          const currentIndex = prev.accessories?.length
-            ? accessoriesItems.findIndex(item => item._id === prev.accessories[0]._id)
-            : 0;
-          const nextIndex = (currentIndex + 1) % accessoriesItems.length;
-          return {
-            ...prev,
-            accessories: [accessoriesItems[nextIndex]]
-          };
-        });
-      }
-    }}
-    disabled={getItemsByCategory('Accessories').length === 0}
-  >
-    ›
+  {/* Action Buttons */}
+<div className="action-buttons">
+  <button onClick={clearOutfit} className="action-btn clear">
+    Clear All
+  </button>
+  <button onClick={saveOutfit} className="action-btn save">
+    Save Outfit
   </button>
 </div>
-      </div>
 
-      {/* Action Buttons */}
-      <div className="action-buttons">
-        <button onClick={clearOutfit} className="action-btn clear">
-          Clear All
-        </button>
-        <button onClick={saveOutfit} className="action-btn save">
-          Save Outfit
-        </button>
-      </div>
-    </div>
-  );
+</div>
+
+);
 }
 
 export default OutfitBuilder; 

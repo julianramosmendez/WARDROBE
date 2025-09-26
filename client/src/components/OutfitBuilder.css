@@ -1,12 +1,13 @@
 /* Stacked Outfit Builder */
 .outfit-builder-stacked {
   padding: 2rem;
-  max-width: 600px;
+  max-width: 90%;
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   gap: 3rem;
 }
 
@@ -15,16 +16,63 @@
   flex-direction: column;
   gap: 2rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 80%;
 }
 
 .outfit-category-stack {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: center;
   gap: 1rem;
+  flex-wrap: wrap;
   width: 100%;
 }
+.layered-item-container {
+  displau: flex;
+  align-item: center;
+  justify-content: center;
+  gap: irem;
+  margin: 0.5rem 0;
+  width: 100%
+}
+.layered-item {
+  position: relative;
+  display: flex;
+  flex-direction: colum;
+  align-items: center;
+  border-radius: 12px;
+  padding: 1rem;
+  min-height: 15vh;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
 
+.outfit-item.stacked {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+.remove-btn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.remove-btn:hover {
+  background: #c82333;
+}
 .nav-arrow-stack {
   background: #000000;
   color: #ffffff;
@@ -32,12 +80,12 @@
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
   flex-shrink: 0;
 }
 
@@ -53,19 +101,19 @@
 }
 
 .outfit-item-stack {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: #ffffff;
   border-radius: 12px;
   padding: 1.5rem;
-  min-height: 200px;
+  min-height: 20vh;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+
 
 .outfit-item-stack:hover {
   transform: translateY(-2px);
@@ -75,7 +123,7 @@
 .outfit-item-stack img {
   width: 120px;
   height: 120px;
-  object-fit: cover;
+  object-fit: cover;  
   border-radius: 8px;
   margin-bottom: 1rem;
 }
@@ -93,7 +141,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 120px;
+  min-height: 15vh;
+  min-width: 200px;
   color: #666666;
   font-style: italic;
   font-size: 0.9rem;
@@ -103,16 +152,34 @@
   border-radius: 8px;
   width: 100%;
 }
+.add-layer-btn{
+  background: #28a745;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transtion: all 0.3s ease;
+  margin-top: 0.5rem;
+}
 
+.add-layer-btn:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
 .action-buttons {
   display: flex;
   gap: 2rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 80%;
+  justify-content: center;
 }
 
 .action-btn {
-  flex: 1;
   padding: 1rem 2rem;
   background: #000000;
   color: #ffffff;
@@ -124,6 +191,7 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   transition: all 0.3s ease;
+  min-width: 150px;
 }
 
 .action-btn:hover {
@@ -132,26 +200,20 @@
 }
 
 .action-btn.clear {
-  background: #000000;
-  color: #ffffff;
-  border-color: #333333;
+  background: #dc3545;
+  border-color: #dc3545;
 }
-
 .action-btn.clear:hover {
-  background: #333333;
-  color: #ffffff;
+  background:  #ffffff;
+  color: #dc3545;
 }
-
-.loading-message,
-.error-message {
-  text-align: center;
-  padding: 2rem;
-  color: #ffffff;
-  font-size: 1.2rem;
+.action-btn.save { 
+  background: #28a745;
+  color: #28a745;
 }
-
-.error-message {
-  color: #ff6b6b;
+.action-btn.save:hover{
+  background: #ffffff;
+  color: #28a745;
 }
 
 /* Outfit Preview Section */
@@ -161,13 +223,13 @@
   padding: 1.5rem;
   border: 1px solid #333333;
   width: 100%;
-  max-width: 800px;
+  max-width: 90%;
   margin-bottom: 1rem;
 }
 
 .outfit-title {
   color: #ffffff;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: 300;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -189,7 +251,7 @@
 
 .category-label {
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 1vw;
   font-weight: 300;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -212,13 +274,8 @@
   border: 1px solid #333333;
   border-radius: 8px;
   padding: 0.75rem;
-  min-width: 100px;
+  flex: 1 1 10%;
   transition: all 0.3s ease;
-}
-
-.outfit-item:hover {
-  border-color: #ffffff;
-  transform: translateY(-2px);
 }
 
 .outfit-item img {
@@ -233,7 +290,7 @@
   color: #cccccc;
   font-size: 0.8rem;
   text-align: center;
-  max-width: 100px;
+  max-width: 100%;
   word-wrap: break-word;
 }
 
@@ -245,497 +302,63 @@
   border: 1px dashed #333333;
   border-radius: 8px;
   padding: 1rem;
-  min-width: 100px;
-  min-height: 120px;
   color: #666666;
   font-style: italic;
   font-size: 0.8rem;
   text-align: center;
 }
 
-.empty-category span {
-  color: #666666;
-  font-size: 0.8rem;
-  text-align: center;
-  font-style: italic;
-}
-
-/* Category Navigation */
-.category-nav {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  margin-bottom: 1rem;
-}
-
-.category-title {
-  color: #ffffff;
-  font-size: 2rem;
-  font-weight: 200;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin: 0;
-  min-width: 200px;
-  text-align: center;
-}
-
-.nav-arrow {
-  background: #000000;
-  color: #ffffff;
-  border: 1px solid #333333;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-arrow:hover:not(:disabled) {
-  background: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
-}
-
-.nav-arrow:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* Item Display */
-.item-display {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  margin-bottom: 1rem;
-}
-
-.current-item {
-  position: relative;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #111111;
-  border: 1px solid #333333;
-  padding: 1rem;
-  min-width: 300px;
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.current-item:hover {
-  border-color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
-}
-
-.current-item img {
-  width: 250px;
-  height: 300px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-.item-name {
-  color: #ffffff;
-  font-size: 1.2rem;
-  font-weight: 300;
-  text-align: center;
-  margin: 0;
-  letter-spacing: 1px;
-}
-
-.item-arrow {
-  width: 60px;
-  height: 60px;
-  font-size: 2rem;
-}
-
-.selected-indicator {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: #ffffff;
-  color: #000000;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 1rem;
-}
-
-/* Item Counter */
-.item-counter {
-  color: #cccccc;
-  font-size: 0.9rem;
-  text-align: center;
-  margin-bottom: 1rem;
-  letter-spacing: 1px;
-}
-
-/* No Items */
-.no-items {
-  text-align: center;
-  padding: 3rem;
-  color: #666666;
-  background: #111111;
-  border-radius: 12px;
-  border: 1px solid #333333;
-  min-width: 300px;
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.add-item-btn {
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
-  background: #000000;
-  color: #ffffff;
-  border: 1px solid #ffffff;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 300;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-}
-
-.add-item-btn:hover {
-  background: #ffffff;
-  color: #000000;
-}
-
-/* Outfit Summary */
-.outfit-summary {
-  background: #111111;
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid #333333;
-  width: 100%;
-  max-width: 600px;
-}
-
-.outfit-summary h3 {
-  color: #ffffff;
-  font-size: 1.1rem;
-  font-weight: 300;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin: 0 0 1rem 0;
-  text-align: center;
-}
-
-.selected-items {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.selected-item {
-  color: #cccccc;
-  font-size: 0.9rem;
-  padding: 0.5rem;
-  background: #000000;
-  border-radius: 6px;
-  border: 1px solid #333333;
-  text-align: center;
-}
-
-.no-selection {
-  color: #666666;
-  font-style: italic;
-  text-align: center;
-  padding: 1rem;
-}
-
-/* Save Section */
-.save-section {
-  display: flex;
-  gap: 1rem;
-  width: 100%;
-  max-width: 400px;
-}
-
-.clear-btn, .save-btn {
-  flex: 1;
-  padding: 1rem;
-  border: 1px solid #333333;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 300;
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-}
-
-.clear-btn {
-  background: #000000;
-  color: #ffffff;
-}
-
-.clear-btn:hover {
-  background: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
-}
-
-.save-btn {
-  background: #000000;
-  color: #ffffff;
-  border-color: #ffffff;
-}
-
-.save-btn:hover {
-  background: #ffffff;
-  color: #000000;
-}
-
-/* Responsive Design */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .outfit-builder-stacked {
     padding: 1rem;
     gap: 2rem;
-  }
+    }
+    .outfit-builder-stacked { 
+      padding: 1rem;
+      gap: 2rem;
+    }
+
+    .layered-item-container {
+      flex-directions: colum;
+      gap: 0.5rem;
+    }
+
+    .outfit-item.stacked,
+    .outfit-item-stack img {
+      width: 100px;
+      height: 100px;
+    }
+
+    .nav-arrow-stack {
+      width: 35px;
+      height: 35px;
+      font-sixe: 14px;
+    }
+    .action-buttons {
+      flex-direction: colum;
+      align-items: center;
+    }
+    .action-btn {
+      width: 100%;
+      max-width: 200px;
+    }
   
-  .outfit-stack {
-    gap: 1.5rem;
-    max-width: 350px;
-  }
-  
-  .outfit-category-stack {
-    gap: 0.75rem;
-  }
-  
-  .nav-arrow-stack {
-    width: 35px;
-    height: 35px;
-    font-size: 1rem;
-  }
-  
-  .outfit-item-stack {
-    padding: 1rem;
-    min-height: 180px;
-  }
-  
-  .outfit-item-stack img {
-    width: 100px;
-    height: 100px;
-  }
-  
-  .action-buttons {
-    gap: 1rem;
-    max-width: 350px;
-  }
-  
-  .action-btn {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.9rem;
-  }
-  
-  .outfit-preview-section {
-    padding: 1rem;
-  }
-  
-  .outfit-structure {
-    gap: 1rem;
-  }
-  
-  .outfit-category {
-    gap: 0.5rem;
-  }
-  
-  .category-items {
-    gap: 0.75rem;
-  }
-  
-  .outfit-item {
-    min-width: 80px;
-    padding: 0.5rem;
-  }
-  
-  .outfit-item img {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .outfit-item-name {
-    font-size: 0.7rem;
-    max-width: 80px;
-  }
-  
-  .empty-category {
-    min-width: 80px;
-    min-height: 100px;
-    padding: 0.75rem;
-  }
-  
-  .category-nav {
-    gap: 1rem;
-  }
-  
-  .category-title {
-    font-size: 1.5rem;
-    min-width: 150px;
-  }
-  
-  .nav-arrow {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2rem;
-  }
-  
-  .item-display {
-    gap: 1rem;
-  }
-  
-  .current-item {
-    min-width: 250px;
-    min-height: 350px;
-  }
-  
-  .current-item img {
-    width: 200px;
-    height: 250px;
-  }
-  
-  .item-arrow {
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-  }
-  
-  .save-section {
-    flex-direction: column;
-    max-width: 300px;
-  }
 }
 
 @media (max-width: 480px) {
-  .outfit-builder-stacked {
-    padding: 0.5rem;
-    gap: 1.5rem;
-  }
-  
-  .outfit-stack {
-    gap: 1rem;
-    max-width: 300px;
-  }
-  
-  .outfit-category-stack {
-    gap: 0.5rem;
-  }
-  
-  .nav-arrow-stack {
-    width: 30px;
-    height: 30px;
-    font-size: 0.9rem;
-  }
-  
-  .outfit-item-stack {
-    padding: 0.75rem;
-    min-height: 160px;
-  }
-  
+  .outfit-item.stacked,
   .outfit-item-stack img {
     width: 80px;
     height: 80px;
   }
-  
-  .category-label-stack {
-    font-size: 0.8rem;
+
+  .outfit-item-stack {
+    mind-width: 150px;
+    padding: 1rem;
   }
-  
-  .action-buttons {
-    gap: 0.75rem;
-    max-width: 300px;
-  }
-  
-  .action-btn {
-    padding: 0.6rem 1rem;
-    font-size: 0.8rem;
-  }
-  
-  .outfit-preview-section {
+
+  .layered-item {
     padding: 0.75rem;
   }
-  
-  .outfit-structure {
-    gap: 0.75rem;
-  }
-  
-  .outfit-category {
-    gap: 0.4rem;
-  }
-  
-  .category-items {
-    gap: 0.5rem;
-  }
-  
-  .outfit-item {
-    min-width: 60px;
-    padding: 0.4rem;
-  }
-  
-  .outfit-item img {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .outfit-item-name {
-    font-size: 0.6rem;
-    max-width: 60px;
-  }
-  
-  .empty-category {
-    min-width: 60px;
-    min-height: 80px;
-    padding: 0.5rem;
-  }
-  
-  .category-title {
-    font-size: 1.2rem;
-    min-width: 120px;
-  }
-  
-  .nav-arrow {
-    width: 35px;
-    height: 35px;
-    font-size: 1rem;
-  }
-  
-  .current-item {
-    min-width: 200px;
-    min-height: 300px;
-  }
-  
-  .current-item img {
-    width: 150px;
-    height: 200px;
-  }
-  
-  .item-name {
-    font-size: 1rem;
-  }
-  
-  .item-arrow {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2rem;
-  }
-} 
+}
