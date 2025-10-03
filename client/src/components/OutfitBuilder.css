@@ -29,17 +29,17 @@
   width: 100%;
 }
 .layered-item-container {
-  displau: flex;
-  align-item: center;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  gap: irem;
+  gap: 1rem;
   margin: 0.5rem 0;
   width: 100%
 }
 .layered-item {
   position: relative;
   display: flex;
-  flex-direction: colum;
+  flex-direction: column;
   align-items: center;
   border-radius: 12px;
   padding: 1rem;
@@ -50,7 +50,7 @@
 .outfit-item.stacked {
   width: 120px;
   height: 120px;
-  object-fit: cover;
+  object-fit: contains;
   border-radius: 8px;
   margin-bottom: 0.5rem;
 }
@@ -163,7 +163,7 @@
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transtion: all 0.3s ease;
+  transition: all 0.3s ease;
   margin-top: 0.5rem;
 }
 
@@ -320,7 +320,7 @@
     }
 
     .layered-item-container {
-      flex-directions: colum;
+      flex-directions: column;
       gap: 0.5rem;
     }
 
@@ -333,10 +333,10 @@
     .nav-arrow-stack {
       width: 35px;
       height: 35px;
-      font-sixe: 14px;
+      font-size: 14px;
     }
     .action-buttons {
-      flex-direction: colum;
+      flex-direction: column;
       align-items: center;
     }
     .action-btn {
@@ -354,7 +354,7 @@
   }
 
   .outfit-item-stack {
-    mind-width: 150px;
+    min-width: 150px;
     padding: 1rem;
   }
 

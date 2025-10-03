@@ -4,7 +4,6 @@ import './OutfitBuilder.css';
 
 function OutfitBuilder() {
   const navigate = useNavigate();
-  const [layeringEnabled, setLayeringEnabled] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -54,6 +53,13 @@ function OutfitBuilder() {
 
   const categories = ['Tops', 'Bottoms', 'Shoes', 'Accessories'];
 
+  const categoryKeyMap = {
+    Tops: "tops",
+    Bottoms: "bottoms",
+    Shoes: "shoes",
+    Accessories: "accessories"
+  };
+
   const getItemsByCategory = (category) => {
     return items.filter(item => item.category === category);
   };
@@ -86,23 +92,33 @@ function OutfitBuilder() {
     });
   };
 
-  const addLayer = (category, item) => {
-    const categoryKey = category.toLowerCase();
-    
+  const addLayer = (category) => {
+    const key = categoryKeyMap[category];
+    const categoryItems = getItemsByCategory(category);
+    if(!key || categoryItems.length === 0) return;
+
+
     setSelectedOutfit(prev => {
-      if(Array.isArray(prev[categoryKey])) {
-        return{
+      const currentLayers = Array.isArray(prev[key]) ? prev[key]: [];
+      
+      if(currentLayers.length === 0){
+        return {
           ...prev,
-         [categoryKey]: [...prev[categoryKey], item]
+          [key]: [categoryItems[0]]
         };
-    } else {
+      }
+
+      const lastItem = currentLayers[currentLayers.length - 1];
+      const lastIndex = categoryItems.findIndex(item => item._id === lastItem._id);
+      
+      const nextIndex =(lastIndex + 1) % categoryItems.length;
+
       return {
         ...prev,
-        [categoryKey]: item
-    };
-  }
-});
-};
+        [key]: [...currentLayers, categoryItems[nextIndex]]
+      };
+    });
+  };
 
   const removeLayer = (category, index) => {
     setSelectedOutfit(prev => ({
@@ -114,16 +130,17 @@ function OutfitBuilder() {
   };
 
   const navigateLayer = (category, itemIndex, direction) => {
+    const key = categoryKeyMap[category];
     const categoryItems = getItemsByCategory(category);
-    if (categoryItems.length === 0) return;
+    if (!key || categoryItems.length === 0) return;
 
     setSelectedOutfit(prev => {
-      const currentItems = [...prev[category]];
+      const currentItems = [...prev[key]];
       const currentItem = currentItems[itemIndex];
       const currentIndex = categoryItems.findIndex(item => item._id === currentItem._id);
 
       let newIndex;
-      if (direction == 'next') {
+      if (direction === 'next') {
         newIndex = (currentIndex + 1) % categoryItems.length;
       } else {
         newIndex = currentIndex === 0 ? categoryItems.length - 1 : currentIndex - 1;
@@ -134,7 +151,7 @@ function OutfitBuilder() {
 
       return {
         ...prev,
-        [category]: newItems
+        [key]: newItems
       };
     });
   };
@@ -187,17 +204,7 @@ function OutfitBuilder() {
   return (
     <div className="outfit-builder">
 
-      {/* layering toggle */}
-      <div className="layer-toggle">
-        <label>
-          <input
-            type="checkbox"
-            checked={layeringEnabled}
-            onChange={() => setLayeringEnabled(!layeringEnabled)}
-          />
-          Enable Layering
-        </label>
-      </div>
+    
     
     <div className="outfit-builder-stacked">
       {/* Stacked Outfit Display */}
@@ -211,8 +218,8 @@ function OutfitBuilder() {
             <div key={idx} className="layered-item-container">
               <button
                 className="nav-arrow-stack left"
-                onClick={() => navigateLayer('tops', idx, 'prev')}
-                disabled={getItemsByCategory('Tops').length === 0}
+                onClick={() => navigateLayer("Tops", idx, "prev")}
+                disabled={getItemsByCategory('Tops').length <= 1}
               >
                 ‹
               </button>
@@ -222,13 +229,18 @@ function OutfitBuilder() {
               alt={top.name}
               className="outfit-item stacked"
               />
-              <button onClick={() => removeLayer("tops", idx)}>✕</button>
+              <button 
+                onClick={() => removeLayer("tops", idx)}
+                className="remove-layer-btn"
+                >
+                  ✕
+                </button>
               </div>
 
               <button
                 className="nav-arrow-stack right"
-                onClick={() => navigateLayer('tops', idx, 'next')}
-                disabled={getItemsByCategory('Tops').length === 0}
+                onClick={() => navigateLayer("Tops", idx, "next")}
+                disabled={getItemsByCategory('Tops').length <= 1}
               >
                 ›
               </button>
@@ -239,14 +251,10 @@ function OutfitBuilder() {
         )}
         <button 
           className="add-layer-btn"
-          onClick={() => {
-            const tops = getItemsByCategory("Tops");
-            if(tops.length > 0) {
-              addLayer("tops", tops[0]);
-            }
-          }}
+          onClick={() => addLayer("Tops")}
+          disabled={getItemsByCategory('Tops').length === 0}
         >
-            + Add Layer
+          + Add Layer
           </button>
         </div>
 
@@ -390,7 +398,7 @@ function OutfitBuilder() {
       <div key={idx} className="layered-item-container">
         <button 
           className="nav-arrow-stack left"
-          onClick={() => navigateLayer('accessories', idx, 'prev')}
+          onClick={() => navigateLayer('Accessories', idx, 'prev')}
           disabled={getItemsByCategory('Accessories').length === 0}
       >
         ‹
@@ -402,11 +410,16 @@ function OutfitBuilder() {
           alt={acc.name}
           className="outfit-item stacked"
       />
-      <button onClick={() => removeLayer("accessories", idx)}>✕</button>
+      <button 
+        onClick={() => removeLayer("accessories", idx)}
+        className="remov-layer-btn"
+        >
+          ✕
+        </button>
     </div>
     <button
       className="nav-arrow-stack right"
-      onClick={() => navigateLayer('accessories', idx, 'next')}
+      onClick={() => navigateLayer('Accessories', idx, 'next')}
       disabled={getItemsByCategory('Accessories').length === 0}
     >
       ›
@@ -419,12 +432,8 @@ function OutfitBuilder() {
   )}
   <button 
     className="add-layer-btn"
-    onClick={() => {
-      const accs = getItemsByCategory("Accessories");
-      if (accs.length > 0) {
-        addLayer("accessories", accs[0]);
-      }
-    }}
+    onClick={() => addLayer("Accessories")}
+    disabled={getItemsByCategory("Accessories").length === 0}
   >
     + Add Layer
   </button>
